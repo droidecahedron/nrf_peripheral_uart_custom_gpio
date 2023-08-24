@@ -9,3 +9,16 @@
 		nordic,nus-uart = &uart0;
 	};
 };
+
+/ {
+    gpiocustom {
+        compatible = "gpio-keys";
+        gpiocus0: gpiocus_0 {
+            gpios = <&gpio0 28 GPIO_ACTIVE_LOW>;
+            label = "Custom gpio 28";
+        };
+    };
+    aliases {
+        gpiocus0 = &gpiocus0;
+    };
+};
