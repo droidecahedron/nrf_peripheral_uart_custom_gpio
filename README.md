@@ -1,0 +1,1 @@
+# nrf_peripheral_uart_custom_gpio
