@@ -29,6 +29,9 @@
 
 #include <zephyr/settings/settings.h>
 
+//io drivers
+#include <zephyr/drivers/gpio.h>
+
 #include <stdio.h>
 
 #include <zephyr/logging/log.h>
@@ -85,6 +88,9 @@ UART_ASYNC_ADAPTER_INST_DEFINE(async_adapter);
 #else
 static const struct device *const async_adapter;
 #endif
+
+#define MODE_BUTTON DT_ALIAS(gpiocus0) // !io!
+static const struct gpio_dt_spec modebutton = GPIO_DT_SPEC_GET_OR(MODE_BUTTON, gpios, {0});
 
 static void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
 {
@@ -570,10 +576,37 @@ static void configure_gpio(void)
 	}
 }
 
+
+static struct gpio_callback modebutton_cb_data;
+void modebutton_pressed(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
+{
+	printk("MODE button pressed\n");
+
+}
+
 int main(void)
 {
 	int blink_status = 0;
 	int err = 0;
+
+	// !io!
+	if(!gpio_is_ready_dt(&modebutton))
+	{
+		LOG_ERR("Button device not ready");
+		return 0;
+	}
+	err = gpio_pin_configure_dt(&modebutton, GPIO_INPUT);
+
+	err = gpio_pin_interrupt_configure_dt(&modebutton, GPIO_INT_EDGE_TO_ACTIVE);
+	if (err != 0) {
+		LOG_ERR("Error: failed to configure interrupt on pin");
+		return 0;
+	}
+
+	gpio_init_callback(&modebutton_cb_data, modebutton_pressed, BIT(modebutton.pin));
+	gpio_add_callback(modebutton.port, &modebutton_cb_data);
+
+	// !io end
 
 	configure_gpio();
 
