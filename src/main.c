@@ -590,7 +590,7 @@ int main(void)
 	int err = 0;
 
 	// !io!
-	if(!gpio_is_ready_dt(&modebutton))
+	if(!device_is_ready(modebutton.port))
 	{
 		LOG_ERR("Button device not ready");
 		return 0;
